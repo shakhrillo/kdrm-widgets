@@ -1,0 +1,19 @@
+{
+    "name": "kdrm-draw-sketch",
+    "label": "KDRM Draw Sketch",
+    "type": "widget",
+    "version": "1.17.0",
+    "exbVersion": "1.17.0",
+    "author": "Shakhrillo",
+    "description": "This is a KDRM Draw Sketch widget. It allows users to create and edit sketches on the map. The widget includes features such as drawing shapes, adding text, and customizing the appearance of sketches. It is designed to be user-friendly and integrates seamlessly with other KDRM widgets.",
+    "copyright": "Copyright 2025 KDRM",
+    "license": "http://www.apache.org/licenses/LICENSE-2.0",
+    "properties": {},
+    "translatedLocales": [
+      "en"
+    ],
+    "defaultSize": {
+        "width": 300,
+        "height": 300
+    }
+  }
