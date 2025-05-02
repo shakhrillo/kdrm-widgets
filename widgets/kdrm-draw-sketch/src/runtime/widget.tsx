@@ -56,21 +56,17 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
   if (!props.useMapWidgetIds?.length) return <div>Please select a map widget</div>;
 
   return (
-    <div className="widget-demo jimu-widget m-2">
+    <div>
       <JimuMapViewComponent
         onActiveViewChange={handleActiveViewChange}
         useMapWidgetId={props.useMapWidgetIds[0]}
       />
-      <p>This widget demonstrates how to use Maps components</p>
       {!jimuMapView ? (
         <div>Map is loading...</div>
       ) : (
-        <>
-          <p>Map View: {jimuMapView.view?.type}</p>
-          <Button onClick={isDrawing ? stopDrawing : startDrawing} type={isDrawing ? 'danger' : 'primary'}>
+        <Button onClick={isDrawing ? stopDrawing : startDrawing} type={isDrawing ? 'danger' : 'primary'}>
             {isDrawing ? 'Click to stop drawing' : 'Click to draw a polygon'}
-          </Button>
-        </>
+        </Button>
       )}
     </div>
   );
