@@ -1,0 +1,8 @@
+{
+  "name": "kdrm-widgets",
+  "type": "exb-web-extension-repo",
+  "description": "KDRM widgets for ArcGIS Experience Builder.",
+  "version": "1.0.0",
+  "copyright": "Copyright 2025 KDRM",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0"
+}
