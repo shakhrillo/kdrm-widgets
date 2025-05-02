@@ -31,13 +31,21 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
     });
   }, [jimuMapView]);
 
-  const handleActiveViewChange = (view: JimuMapView) => view && setJimuMapView(view);
+  const handleActiveViewChange = (view: JimuMapView) => {
+    if (view) {
+      setJimuMapView(view);
+    }
+  };
 
   const startDrawing = () => {
     if (!sketch) return;
     sketch.create('polygon')
-      .then(() => setIsDrawing(true))
-      .catch(err => console.error('Polygon creation error:', err));
+      .then(() => {
+        setIsDrawing(true);
+      })
+      .catch(err => {
+        console.error('Polygon creation error:', err);
+      });
   };
 
   const stopDrawing = () => {
@@ -59,7 +67,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
       ) : (
         <>
           <p>Map View: {jimuMapView.view?.type}</p>
-          <Button onClick={isDrawing ? stopDrawing : startDrawing}>
+          <Button onClick={isDrawing ? stopDrawing : startDrawing} type={isDrawing ? 'danger' : 'primary'}>
             {isDrawing ? 'Click to stop drawing' : 'Click to draw a polygon'}
           </Button>
         </>
