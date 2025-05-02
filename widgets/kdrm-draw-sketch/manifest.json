@@ -9,11 +9,7 @@
   "copyright": "Copyright 2025 KDRM",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {},
-  "dependencies": [
-    "jimu-core",
-    "jimu-ui",
-    "jimu-arcgis"
-  ],
+  "dependencies": [],
   "translatedLocales": [
     "en"
   ],
