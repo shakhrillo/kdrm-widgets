@@ -1,5 +1,5 @@
 import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis';
-import { React, type IMDataSourceInfo, type DataSource, DataSourceStatus, type AllWidgetProps, DataSourceComponent, DataSourceManager, type FeatureLayerDataSource } from 'jimu-core';
+import { React, type DataSource, type AllWidgetProps, DataSourceComponent, DataSourceManager, type FeatureLayerDataSource } from 'jimu-core';
 const { useState, useEffect } = React
 
 export default function Widget(props: AllWidgetProps<unknown>) {
@@ -23,7 +23,8 @@ export default function Widget(props: AllWidgetProps<unknown>) {
     ]) => {
       const tableFeatureLayer = new FeatureLayer({
         url: (ds as FeatureLayerDataSource).url,
-        definitionExpression: "1=1", // Start with empty table
+        definitionExpression: "1=1",
+        outFields: ['*'],
       });
 
       const featureTable = new FeatureTable({
@@ -44,12 +45,13 @@ export default function Widget(props: AllWidgetProps<unknown>) {
           { name: "lastupdate", label: "Last Update" },
         ],
       });
-      
+
       setFeatureTable(tableFeatureLayer);
     });
   }, [jimuMapView, ds, featureTable]);
 
   useEffect(() => {
+    console.log('polygon', polygone)
     const runQuery = async () => {
       const ds = DataSourceManager.getInstance().getDataSource(
         props.useDataSources[0].dataSourceId
@@ -62,18 +64,16 @@ export default function Widget(props: AllWidgetProps<unknown>) {
       ]).then(([
         query
       ]) => {
-        // Execute the query
         query.executeQueryJSON(ds.url, {
           geometry: polygone,
           spatialRelationship: "intersects",
           returnGeometry: false,
           outFields: ['*']
         }).then(function (results) {
+          console.log("Query results: ", results);
           const features = results.features;
-          console.log("Found features:", features);
-          const objectIds = features
-                      .map((feature) => feature.attributes.objectid)
-                      .join(",");
+          const objectIds = features.map((feature) => feature.attributes.objectid).join(",");
+          console.log('featureTable', featureTable)
           featureTable.definitionExpression = `OBJECTID IN (${objectIds})`;
         }).catch(function (error) {
           console.error("Query failed: ", error);
@@ -107,7 +107,6 @@ export default function Widget(props: AllWidgetProps<unknown>) {
   };
 
   const isDsConfigured = () => {
-    console.log('props.useDataSources', props.useDataSources)
     if (props.useDataSources &&
       props.useDataSources.length === 1 &&
       props.useDataSources[0].fields &&
@@ -130,14 +129,14 @@ export default function Widget(props: AllWidgetProps<unknown>) {
         onActiveViewChange={handleActiveViewChange}
         useMapWidgetId={props.useMapWidgetIds[0]}
       />
-      {!jimuMapView ? (
+      {/* {!jimuMapView ? (
         <div>Map is loading...</div>
       ) : (
         <p>
           Done
         </p>
       )}
-    <hr />
+    <hr /> */}
 
     <DataSourceComponent useDataSource={props.useDataSources[0]} widgetId={props.id} queryCount query={query} onDataSourceCreated={(ds: DataSource) => {setDs(ds)}}></DataSourceComponent>
 
