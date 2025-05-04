@@ -53,6 +53,8 @@ export default function Widget(props: AllWidgetProps<unknown>) {
   useEffect(() => {
     console.log('polygon', polygone)
     const runQuery = async () => {
+      if (!polygone || !featureTable || !props.useDataSources || props.useDataSources.length === 0) return;
+      
       const ds = DataSourceManager.getInstance().getDataSource(
         props.useDataSources[0].dataSourceId
       ) as FeatureLayerDataSource
@@ -125,10 +127,16 @@ export default function Widget(props: AllWidgetProps<unknown>) {
   }
 
   return <div className="widget-use-feature-layer" style={{ width: '100%', height: '100%', maxHeight: '800px', overflow: 'auto' }}>
-     <JimuMapViewComponent
-        onActiveViewChange={handleActiveViewChange}
-        useMapWidgetId={props.useMapWidgetIds[0]}
-      />
+    {
+      props.useMapWidgetIds?.length === 0 || !props.useMapWidgetIds ? (
+        <div>Please select a map widget</div>
+      ) : (
+        <JimuMapViewComponent
+            onActiveViewChange={handleActiveViewChange}
+            useMapWidgetId={props.useMapWidgetIds[0]}
+          />
+      )
+    }
       {/* {!jimuMapView ? (
         <div>Map is loading...</div>
       ) : (
