@@ -1,10 +1,59 @@
+import FeatureLayer from 'esri/layers/FeatureLayer';
+import FeatureTable from 'esri/widgets/FeatureTable';
 import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis';
 import { React, type IMDataSourceInfo, type DataSource, DataSourceStatus, type AllWidgetProps, DataSourceComponent, DataSourceManager, type FeatureLayerDataSource } from 'jimu-core';
 const { useState, useEffect } = React
 
 export default function Widget(props: AllWidgetProps<unknown>) {
   const [jimuMapView, setJimuMapView] = useState<JimuMapView>(null);
+  const [ds, setDs] = useState<DataSource>(null);
+  const [featureTable, setFeatureTable] = useState<any>(null);
   const [polygone, setPolygone] = useState<__esri.Polygon>(null);
+  const [query, setQuery] = useState<any>({
+    where: '1=1'
+  });
+
+  useEffect(() => {
+    if (!jimuMapView || !ds || featureTable) return;
+
+    console.log('ds', ds)
+
+    loadArcGISJSAPIModules([
+      'esri/layers/FeatureLayer',
+      'esri/widgets/FeatureTable',
+      'esri/rest/query'
+    ]).then(([
+      FeatureLayer,
+      FeatureTable,
+      query
+    ]) => {
+      const tableFeatureLayer = new FeatureLayer({
+        url: (ds as FeatureLayerDataSource).url,
+        definitionExpression: "1=1", // Start with empty table
+      });
+
+      const featureTable = new FeatureTable({
+        view: jimuMapView.view,
+        layer: tableFeatureLayer,
+        container: document.getElementById("table-container"),
+        fieldConfigs: [
+          { name: "objectid", label: "Object ID" },
+          { name: "facilityid", label: "Facility ID" },
+          { name: "installdate", label: "Install Date" },
+          { name: "material", label: "Material" },
+          { name: "diameter", label: "Diameter" },
+          { name: "watertype", label: "Water Type" },
+          { name: "enabled", label: "Enabled" },
+          { name: "activeflag", label: "Active Flag" },
+          { name: "ownedby", label: "Owned By" },
+          { name: "maintby", label: "Maintained By" },
+          { name: "lastupdate", label: "Last Update" },
+        ],
+      });
+      
+      setFeatureTable(tableFeatureLayer);
+    });
+  }, [jimuMapView, ds, featureTable]);
 
   useEffect(() => {
     const runQuery = async () => {
@@ -15,11 +64,14 @@ export default function Widget(props: AllWidgetProps<unknown>) {
       if (!ds) return;
 
       await loadArcGISJSAPIModules([
+        'esri/layers/FeatureLayer',
+        'esri/widgets/FeatureTable',
         'esri/rest/query'
       ]).then(([
+        FeatureLayer,
+        FeatureTable,
         query
       ]) => {
-  
         // Execute the query
         query.executeQueryJSON(ds.url, {
           geometry: polygone,
@@ -29,6 +81,10 @@ export default function Widget(props: AllWidgetProps<unknown>) {
         }).then(function (results) {
           const features = results.features;
           console.log("Found features:", features);
+          const objectIds = features
+                      .map((feature) => feature.attributes.objectid)
+                      .join(",");
+          featureTable.definitionExpression = `OBJECTID IN (${objectIds})`;
         }).catch(function (error) {
           console.error("Query failed: ", error);
         });
@@ -61,6 +117,7 @@ export default function Widget(props: AllWidgetProps<unknown>) {
   };
 
   const isDsConfigured = () => {
+    console.log('props.useDataSources', props.useDataSources)
     if (props.useDataSources &&
       props.useDataSources.length === 1 &&
       props.useDataSources[0].fields &&
@@ -72,6 +129,7 @@ export default function Widget(props: AllWidgetProps<unknown>) {
 
   const dataRender = (ds: DataSource, info: IMDataSourceInfo) => {
     const fields = props.useDataSources[0].fields
+
     return <>
       <div>Query state: {info.status}</div>
 
@@ -114,12 +172,15 @@ export default function Widget(props: AllWidgetProps<unknown>) {
         </p>
       )}
     <hr />
+    {/* <hr />
     <h3>
       This widget shows how to use a feature layer as a data source.
-    </h3>
+    </h3> */}
 
-    <DataSourceComponent useDataSource={props.useDataSources[0]} widgetId={props.id} queryCount>
-      {dataRender}
+    <DataSourceComponent useDataSource={props.useDataSources[0]} widgetId={props.id} queryCount query={query} onDataSourceCreated={(ds: DataSource) => {setDs(ds)}}>
+      {/* {dataRender} */}
     </DataSourceComponent>
+
+    <div id="table-container" style={{ width: '100%', height: '400px', overflow: 'auto' }}></div>
   </div>
 }
