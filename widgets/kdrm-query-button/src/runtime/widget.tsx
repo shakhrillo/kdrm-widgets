@@ -1,5 +1,3 @@
-import FeatureLayer from 'esri/layers/FeatureLayer';
-import FeatureTable from 'esri/widgets/FeatureTable';
 import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis';
 import { React, type IMDataSourceInfo, type DataSource, DataSourceStatus, type AllWidgetProps, DataSourceComponent, DataSourceManager, type FeatureLayerDataSource } from 'jimu-core';
 const { useState, useEffect } = React
@@ -16,16 +14,12 @@ export default function Widget(props: AllWidgetProps<unknown>) {
   useEffect(() => {
     if (!jimuMapView || !ds || featureTable) return;
 
-    console.log('ds', ds)
-
     loadArcGISJSAPIModules([
       'esri/layers/FeatureLayer',
-      'esri/widgets/FeatureTable',
-      'esri/rest/query'
+      'esri/widgets/FeatureTable'
     ]).then(([
       FeatureLayer,
-      FeatureTable,
-      query
+      FeatureTable
     ]) => {
       const tableFeatureLayer = new FeatureLayer({
         url: (ds as FeatureLayerDataSource).url,
@@ -64,12 +58,8 @@ export default function Widget(props: AllWidgetProps<unknown>) {
       if (!ds) return;
 
       await loadArcGISJSAPIModules([
-        'esri/layers/FeatureLayer',
-        'esri/widgets/FeatureTable',
         'esri/rest/query'
       ]).then(([
-        FeatureLayer,
-        FeatureTable,
         query
       ]) => {
         // Execute the query
@@ -92,7 +82,7 @@ export default function Widget(props: AllWidgetProps<unknown>) {
     }
 
     runQuery()
-  }, [polygone, props.useDataSources]);
+  }, [polygone, props.useDataSources, featureTable]);
 
   const handleActiveViewChange = (view: JimuMapView) => {
     if (view) {
@@ -127,30 +117,6 @@ export default function Widget(props: AllWidgetProps<unknown>) {
     return false
   }
 
-  const dataRender = (ds: DataSource, info: IMDataSourceInfo) => {
-    const fields = props.useDataSources[0].fields
-
-    return <>
-      <div>Query state: {info.status}</div>
-
-      <div className="record-list" style={{ width: '100%', marginTop: '20px', height: 'calc(100% - 80px)', overflow: 'auto' }}>
-        {
-          ds && ds.getStatus() === DataSourceStatus.Loaded
-            ? ds.getRecords().map((r, i) => {
-              return <div key={i} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
-                {
-                  fields.map((f, j) => {
-                    return <div key={j}>{f}: {r.getData()[f]}</div>
-                  })
-                }
-              </div>
-            })
-            : null
-        }
-      </div>
-    </>
-  }
-
   if (!isDsConfigured()) {
     return <h3>
       This widget demonstrates how to use a feature layer as a data source.
@@ -172,14 +138,8 @@ export default function Widget(props: AllWidgetProps<unknown>) {
         </p>
       )}
     <hr />
-    {/* <hr />
-    <h3>
-      This widget shows how to use a feature layer as a data source.
-    </h3> */}
 
-    <DataSourceComponent useDataSource={props.useDataSources[0]} widgetId={props.id} queryCount query={query} onDataSourceCreated={(ds: DataSource) => {setDs(ds)}}>
-      {/* {dataRender} */}
-    </DataSourceComponent>
+    <DataSourceComponent useDataSource={props.useDataSources[0]} widgetId={props.id} queryCount query={query} onDataSourceCreated={(ds: DataSource) => {setDs(ds)}}></DataSourceComponent>
 
     <div id="table-container" style={{ width: '100%', height: '400px', overflow: 'auto' }}></div>
   </div>
