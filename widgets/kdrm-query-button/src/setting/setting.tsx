@@ -4,8 +4,6 @@ import { DataSourceSelector, FieldSelector } from 'jimu-ui/advanced/data-source-
 
 export default function Setting(props: AllWidgetSettingProps<unknown>) {
   const onFieldChange = (allSelectedFields: IMFieldSchema[]) => {
-    console.log('__', allSelectedFields);
-    console.log('allSelectedFields', [{ ...props.useDataSources[0], ...{ fields: allSelectedFields.map(f => f.jimuName) } }])
     props.onSettingChange({
       id: props.id,
       useDataSources: [{ ...props.useDataSources[0], ...{ fields: allSelectedFields.map(f => f.jimuName) } }]
@@ -20,7 +18,6 @@ export default function Setting(props: AllWidgetSettingProps<unknown>) {
   }
 
   const onDataSourceChange = (useDataSources: UseDataSource[]) => {
-    console.log('__++', useDataSources)
     props.onSettingChange({
       id: props.id,
       useDataSources: useDataSources
