@@ -1,14 +1,10 @@
 import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis';
-import { React, type IMDataSourceInfo, type DataSource, DataSourceStatus, type FeatureLayerQueryParams, type AllWidgetProps, DataSourceComponent, DataSourceManager, type FeatureLayerDataSource } from 'jimu-core';
-const { useState, useEffect, useRef } = React
+import { React, type IMDataSourceInfo, type DataSource, DataSourceStatus, type AllWidgetProps, DataSourceComponent, DataSourceManager, type FeatureLayerDataSource } from 'jimu-core';
+const { useState, useEffect } = React
 
 export default function Widget(props: AllWidgetProps<unknown>) {
   const [jimuMapView, setJimuMapView] = useState<JimuMapView>(null);
   const [polygone, setPolygone] = useState<__esri.Polygon>(null);
-
-  useEffect(() => {
-    console.log('polygone', polygone)
-  }, [polygone, props.useDataSources]);
 
   useEffect(() => {
     const runQuery = async () => {
@@ -18,15 +14,9 @@ export default function Widget(props: AllWidgetProps<unknown>) {
 
       if (!ds) return;
 
-      console.log('ds', ds);
-
-      // Assuming you are working with the ArcGIS API for JavaScript
-
-      loadArcGISJSAPIModules([
-        // 'esri/rest/QueryTask',
+      await loadArcGISJSAPIModules([
         'esri/rest/query'
       ]).then(([
-        // QueryTask,
         query
       ]) => {
   
@@ -59,8 +49,6 @@ export default function Widget(props: AllWidgetProps<unknown>) {
       if (hitResponse.results.length > 0) {
         const polygonGraphic: any = hitResponse.results.find((result: any) => result.graphic.geometry.type === 'polygon');
         if (polygonGraphic) {
-          console.log('Polygon selected:', polygonGraphic);
-          console.log('Geometry:', polygonGraphic.graphic.geometry);
           setPolygone(polygonGraphic.graphic.geometry);
         } else {
           console.log('No polygon selected.');
