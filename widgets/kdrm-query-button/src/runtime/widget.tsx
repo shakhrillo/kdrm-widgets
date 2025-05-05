@@ -7,10 +7,6 @@ export default function Widget(props: AllWidgetProps<unknown>) {
   const [ds, setDs] = useState<DataSource>(null);
   const [featureTable, setFeatureTable] = useState<any>(null);
   const [polygone, setPolygone] = useState<__esri.Polygon>(null);
-  const [query, setQuery] = useState<any>({
-    where: '1=1'
-  });
-
   
   useEffect(() => {
     if (!jimuMapView) return;
@@ -25,9 +21,6 @@ export default function Widget(props: AllWidgetProps<unknown>) {
 
   useEffect(() => {
     if (!jimuMapView || !ds || featureTable) return;
-
-    // Add to map
-    console.log('props', props)
 
     loadArcGISJSAPIModules([
       'esri/layers/FeatureLayer',
@@ -57,28 +50,14 @@ export default function Widget(props: AllWidgetProps<unknown>) {
       const featureTable = new FeatureTable({
         view: jimuMapView.view,
         layer: tableFeatureLayer,
-        container: document.getElementById("table-container"),
-        fieldConfigs: [
-          { name: "objectid", label: "Object ID" },
-          { name: "facilityid", label: "Facility ID" },
-          { name: "installdate", label: "Install Date" },
-          { name: "material", label: "Material" },
-          { name: "diameter", label: "Diameter" },
-          { name: "watertype", label: "Water Type" },
-          { name: "enabled", label: "Enabled" },
-          { name: "activeflag", label: "Active Flag" },
-          { name: "ownedby", label: "Owned By" },
-          { name: "maintby", label: "Maintained By" },
-          { name: "lastupdate", label: "Last Update" },
-        ],
+        container: document.getElementById("table-container")
       });
 
       setFeatureTable(tableFeatureLayer);
     });
-  }, [jimuMapView, ds, featureTable]);
+  }, [jimuMapView, ds, featureTable, props, props.useDataSources, props.useMapWidgetIds]);
 
   useEffect(() => {
-    console.log('polygon', polygone)
     const runQuery = async () => {
       if (!polygone || !featureTable || !props.useDataSources || props.useDataSources.length === 0) return;
       
@@ -99,10 +78,8 @@ export default function Widget(props: AllWidgetProps<unknown>) {
           returnGeometry: false,
           outFields: ['*']
         }).then(function (results) {
-          console.log("Query results: ", results);
           const features = results.features;
           const objectIds = features.map((feature) => feature.attributes.objectid).join(",");
-          console.log('featureTable', featureTable)
           featureTable.definitionExpression = `OBJECTID IN (${objectIds})`;
         }).catch(function (error) {
           console.error("Query failed: ", error);
@@ -120,16 +97,19 @@ export default function Widget(props: AllWidgetProps<unknown>) {
 
     view.view.on('click', async (event) => {
       const hitResponse = await view.view.hitTest(event);
-
-      if (hitResponse.results.length > 0) {
-        const polygonGraphic: any = hitResponse.results.find((result: any) => result.graphic.geometry.type === 'polygon');
-        if (polygonGraphic) {
-          setPolygone(polygonGraphic.graphic.geometry);
+      try {
+        if (hitResponse.results.length > 0) {
+          const polygonGraphic: any = hitResponse.results.find((result: any) => result.graphic.geometry.type === 'polygon');
+          if (polygonGraphic) {
+            setPolygone(polygonGraphic.graphic.geometry);
+          } else {
+            console.log('No polygon selected.');
+          }
         } else {
-          console.log('No polygon selected.');
+          console.log('No features hit.');
         }
-      } else {
-        console.log('No features hit.');
+      } catch (error) {
+        // No polygon selected skip
       }
     });
     
