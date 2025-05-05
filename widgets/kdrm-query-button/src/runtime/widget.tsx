@@ -11,8 +11,23 @@ export default function Widget(props: AllWidgetProps<unknown>) {
     where: '1=1'
   });
 
+  
+  useEffect(() => {
+    if (!jimuMapView) return;
+
+    jimuMapView.view.when(() => {
+      jimuMapView.view.goTo({
+        target: props?.center,
+        zoom: props?.zoom
+      });
+    });
+  }, [jimuMapView, props?.center, props?.zoom]);
+
   useEffect(() => {
     if (!jimuMapView || !ds || featureTable) return;
+
+    // Add to map
+    console.log('props', props)
 
     loadArcGISJSAPIModules([
       'esri/layers/FeatureLayer',
@@ -21,8 +36,20 @@ export default function Widget(props: AllWidgetProps<unknown>) {
       FeatureLayer,
       FeatureTable
     ]) => {
+
+      const url = (ds as FeatureLayerDataSource).url;
+
+      const mapFeatureLayer = new FeatureLayer({
+        url,
+        minScale: 500000,
+        maxScale: 1000,
+        labelingInfo: [],
+      });
+
+      jimuMapView.view.map.add(mapFeatureLayer);
+
       const tableFeatureLayer = new FeatureLayer({
-        url: (ds as FeatureLayerDataSource).url,
+        url,
         definitionExpression: "1=1",
         outFields: ['*'],
       });
@@ -87,9 +114,9 @@ export default function Widget(props: AllWidgetProps<unknown>) {
   }, [polygone, props.useDataSources, featureTable]);
 
   const handleActiveViewChange = (view: JimuMapView) => {
-    if (view) {
-      setJimuMapView(view);
-    }
+    if (!view || !view.view) return;
+
+    setJimuMapView(view);
 
     view.view.on('click', async (event) => {
       const hitResponse = await view.view.hitTest(event);
@@ -146,7 +173,7 @@ export default function Widget(props: AllWidgetProps<unknown>) {
       )}
     <hr /> */}
 
-    <DataSourceComponent useDataSource={props.useDataSources[0]} widgetId={props.id} queryCount query={query} onDataSourceCreated={(ds: DataSource) => {setDs(ds)}}></DataSourceComponent>
+    <DataSourceComponent useDataSource={props.useDataSources[0]} widgetId={props.id} onDataSourceCreated={(ds: DataSource) => {setDs(ds)}}></DataSourceComponent>
 
     <div id="table-container" style={{ width: '100%', height: '400px', overflow: 'auto' }}></div>
   </div>

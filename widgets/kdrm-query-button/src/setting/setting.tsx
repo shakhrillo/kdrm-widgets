@@ -2,8 +2,9 @@ import { React, Immutable, type IMFieldSchema, type UseDataSource, DataSourceTyp
 import type { AllWidgetSettingProps } from 'jimu-for-builder'
 import { DataSourceSelector, FieldSelector } from 'jimu-ui/advanced/data-source-selector'
 import { MapWidgetSelector, SettingRow, SettingSection } from 'jimu-ui/advanced/setting-components'
+import type { IMConfig } from '../config'
 
-export default function Setting(props: AllWidgetSettingProps<unknown>) {
+export default function Setting(props: AllWidgetSettingProps<IMConfig>) {
   const onFieldChange = (allSelectedFields: IMFieldSchema[]) => {
     props.onSettingChange({
       id: props.id,
@@ -32,6 +33,20 @@ export default function Setting(props: AllWidgetSettingProps<unknown>) {
     })
   }
 
+  const onSelectCenter = (center: number[]) => {
+    props.onSettingChange({
+      id: props.id,
+      center: center
+    })
+  }
+
+  const onSelectZoom = (zoom: number) => {
+    props.onSettingChange({
+      id: props.id,
+      zoom: zoom
+    })
+  }
+
   return <div className="use-feature-layer-setting p-2">
     <SettingSection
       className="map-selector-section"
@@ -44,6 +59,37 @@ export default function Setting(props: AllWidgetSettingProps<unknown>) {
         <MapWidgetSelector
           onSelect={onMapWidgetSelected}
           useMapWidgetIds={props.useMapWidgetIds}
+        />
+      </SettingRow>
+    </SettingSection>
+    <hr />
+    <SettingSection
+      className="map-selector-section"
+      title={props.intl.formatMessage({
+        id: 'centerLabel',
+        defaultMessage: 'Center'
+      })}
+    >
+      <SettingRow>
+        <input
+          type="text"
+          value={props?.center?.join(',')}
+          onChange={(e) => onSelectCenter(e.target.value.split(',').map(Number))}
+        />
+      </SettingRow>
+    </SettingSection>
+    <SettingSection
+      className="map-selector-section"
+      title={props.intl.formatMessage({
+        id: 'zoomLabel',
+        defaultMessage: 'Zoom'
+      })}
+    >
+      <SettingRow>
+        <input
+          type="number"
+          value={props.zoom}
+          onChange={(e) => onSelectZoom(Number(e.target.value))}
         />
       </SettingRow>
     </SettingSection>
