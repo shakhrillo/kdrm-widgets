@@ -1,5 +1,6 @@
 import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis';
 import { React, type DataSource, type AllWidgetProps, DataSourceComponent, DataSourceManager, type FeatureLayerDataSource } from 'jimu-core';
+import { Button } from 'jimu-ui';
 const { useState, useEffect } = React
 
 export default function Widget(props: AllWidgetProps<unknown>) {
@@ -57,39 +58,6 @@ export default function Widget(props: AllWidgetProps<unknown>) {
     });
   }, [jimuMapView, ds, featureTable, props, props.useDataSources, props.useMapWidgetIds]);
 
-  useEffect(() => {
-    const runQuery = async () => {
-      if (!polygone || !featureTable || !props.useDataSources || props.useDataSources.length === 0) return;
-      
-      const ds = DataSourceManager.getInstance().getDataSource(
-        props.useDataSources[0].dataSourceId
-      ) as FeatureLayerDataSource
-
-      if (!ds) return;
-
-      await loadArcGISJSAPIModules([
-        'esri/rest/query'
-      ]).then(([
-        query
-      ]) => {
-        query.executeQueryJSON(ds.url, {
-          geometry: polygone,
-          spatialRelationship: "intersects",
-          returnGeometry: false,
-          outFields: ['*']
-        }).then(function (results) {
-          const features = results.features;
-          const objectIds = features.map((feature) => feature.attributes.objectid).join(",");
-          featureTable.definitionExpression = `OBJECTID IN (${objectIds})`;
-        }).catch(function (error) {
-          console.error("Query failed: ", error);
-        });
-      })
-    }
-
-    runQuery()
-  }, [polygone, props.useDataSources, featureTable]);
-
   const handleActiveViewChange = (view: JimuMapView) => {
     if (!view || !view.view) return;
 
@@ -114,6 +82,41 @@ export default function Widget(props: AllWidgetProps<unknown>) {
     });
     
   };
+
+  const makeQuery = async () => {
+    if (!polygone || !featureTable || !props.useDataSources || props.useDataSources.length === 0) return;
+    
+    const ds = DataSourceManager.getInstance().getDataSource(
+      props.useDataSources[0].dataSourceId
+    ) as FeatureLayerDataSource
+
+    if (!ds) return;
+
+    await loadArcGISJSAPIModules([
+      'esri/rest/query'
+    ]).then(([
+      query
+    ]) => {
+      query.executeQueryJSON(ds.url, {
+        geometry: polygone,
+        spatialRelationship: "intersects",
+        returnGeometry: false,
+        outFields: ['*']
+      }).then(function (results) {
+        const features = results.features;
+        const objectIds = features.map((feature) => feature.attributes.objectid).join(",");
+        featureTable.definitionExpression = `OBJECTID IN (${objectIds})`;
+      }).catch(function (error) {
+        console.error("Query failed: ", error);
+      });
+    })
+  }
+
+  const clearQuery = () => {
+    if (!featureTable) return;
+    featureTable.definitionExpression = "1=1";
+    setPolygone(null);
+  }
 
   const isDsConfigured = () => {
     if (props.useDataSources &&
@@ -144,17 +147,17 @@ export default function Widget(props: AllWidgetProps<unknown>) {
           />
       )
     }
-      {/* {!jimuMapView ? (
-        <div>Map is loading...</div>
-      ) : (
-        <p>
-          Done
-        </p>
-      )}
-    <hr /> */}
 
     <DataSourceComponent useDataSource={props.useDataSources[0]} widgetId={props.id} onDataSourceCreated={(ds: DataSource) => {setDs(ds)}}></DataSourceComponent>
 
+    <div className="d-flex p-3">
+      <Button onClick={makeQuery} disabled={!polygone}>
+        Make a query
+      </Button>
+      <Button onClick={clearQuery} disabled={!featureTable} className="ml-2">
+        Clear query
+      </Button>
+    </div>
     <div id="table-container" style={{ width: '100%', height: '400px', overflow: 'auto' }}></div>
   </div>
 }

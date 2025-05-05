@@ -23,7 +23,14 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
         view: jimuMapView.view,
         layer: graphicsLayer,
         availableCreateTools: ['polygon'],
-        visible: false
+        creationMode: 'single',
+        visible: false,
+      }) as __esri.Sketch;
+
+      newSketch.on('create', (event) => {
+        if (event.state === 'complete') {
+          setIsDrawing(false);
+        }
       });
 
       jimuMapView.view.ui.add(newSketch, 'top-right');
@@ -39,6 +46,10 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
 
   const startDrawing = () => {
     if (!sketch) return;
+
+    // Remove previously drawn graphics
+    sketch.layer.removeAll();
+
     sketch.create('polygon')
       .then(() => {
         setIsDrawing(true);
@@ -64,9 +75,14 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
       {!jimuMapView ? (
         <div>Map is loading...</div>
       ) : (
-        <Button onClick={isDrawing ? stopDrawing : startDrawing} type={isDrawing ? 'danger' : 'primary'}>
+        <div className="d-fle">
+          <Button onClick={isDrawing ? stopDrawing : startDrawing} type={isDrawing ? 'danger' : 'primary'}>
             {isDrawing ? 'Click to stop drawing' : 'Click to draw a polygon'}
-        </Button>
+          </Button>
+          <Button onClick={() => {sketch.layer.removeAll()}} type="secondary" className="ml-2">
+            Clear
+          </Button>
+        </div>
       )}
     </div>
   );
