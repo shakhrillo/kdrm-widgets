@@ -113,6 +113,17 @@ export default function Widget(props: AllWidgetProps<unknown>) {
   }
 
   const clearQuery = () => {
+    const map = jimuMapView?.view?.map;
+    map.layers.forEach(layer => {
+      if (layer.type === "graphics") {
+        layer.graphics.forEach(graphic => {
+          if (graphic.geometry.type === "polygon") {
+            layer.remove(graphic);
+          }
+        });
+      }
+    });    
+
     if (!featureTable) return;
     featureTable.definitionExpression = "1=1";
     setPolygone(null);
@@ -158,6 +169,6 @@ export default function Widget(props: AllWidgetProps<unknown>) {
         Clear query
       </Button>
     </div>
-    <div id="table-container" style={{ width: '100%', height: '400px', overflow: 'auto' }}></div>
+    <div id="table-container" style={{ width: '100%', height: "calc(100vh - 180px)", overflow: 'auto' }}></div>
   </div>
 }

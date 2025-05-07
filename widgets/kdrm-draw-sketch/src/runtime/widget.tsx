@@ -24,7 +24,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
         layer: graphicsLayer,
         availableCreateTools: ['polygon'],
         creationMode: 'single',
-        visible: false,
+        visible: false
       }) as __esri.Sketch;
 
       newSketch.on('create', (event) => {
@@ -79,7 +79,7 @@ export default function Widget(props: AllWidgetProps<IMConfig>) {
           <Button onClick={isDrawing ? stopDrawing : startDrawing} type={isDrawing ? 'danger' : 'primary'}>
             {isDrawing ? 'Click to stop drawing' : 'Click to draw a polygon'}
           </Button>
-          <Button onClick={() => {sketch.layer.removeAll()}} type="secondary" className="ml-2">
+          <Button onClick={() => {sketch.layer.removeAll()}} type="secondary" className="ml-2 d-none">
             Clear
           </Button>
         </div>
