@@ -1,0 +1,20 @@
+{
+  "name": "kdrm-query-layers",
+  "label": "KDRM Query Layers",
+  "type": "widget",
+  "version": "1.17.0",
+  "exbVersion": "1.17.0",
+  "author": "Shakhrillo",
+  "description": "This is a KDRM Query Layers widget. It allows users to perform queries on the map and display the results. The widget is designed to be user-friendly and integrates seamlessly with other KDRM widgets. It includes features such as customizable query parameters, result display options, and integration with other KDRM tools.",
+  "copyright": "Copyright 2025 KDRM",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {},
+  "dependencies": [],
+  "translatedLocales": [
+    "en"
+  ],
+  "defaultSize": {
+    "width": 300,
+    "height": 350
+  }
+}
